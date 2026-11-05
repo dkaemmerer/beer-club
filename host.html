@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Beer Club — Host Director</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍺</text></svg>">
+</head>
+<body>
+  <div class="host-shell">
+    
+    <!-- Top Host App Bar -->
+    <header class="app-header">
+      <div class="header-brand">
+        <div class="brand-mark" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14"/>
+          </svg>
+        </div>
+        <div class="brand-titles">
+          <h1 id="host-event-title">Host Dashboard</h1>
+          <div class="brand-theme" id="host-event-theme">Tasting Control Center</div>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <span id="badge-host-status" class="badge badge-emerald">Blind Tasting Live</span>
+        <button id="btn-reset-blank-event" class="btn btn-secondary btn-sm" title="Wipe all beers, participants &amp; ratings to start from scratch">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>
+          </svg>
+          New Blank Event
+        </button>
+        <a id="link-participant-view" href="/join" target="_blank" class="btn btn-secondary btn-sm">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+          </svg>
+          Participant View
+        </a>
+      </div>
+    </header>
+
+    <!-- Segmented Navigation Bar -->
+    <nav class="tabs-nav" aria-label="Host Sections">
+      <button class="tab-btn active" data-tab="tab-live">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="2"/><path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"/>
+        </svg>
+        Live Pour Control
+      </button>
+      <button class="tab-btn" data-tab="tab-qr">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <rect width="5" height="5" x="3" y="3" rx="1"/><rect width="5" height="5" x="16" y="3" rx="1"/><rect width="5" height="5" x="3" y="16" rx="1"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/><path d="M21 21v.01"/><path d="M12 7v3a2 2 0 0 1-2 2H7"/><path d="M3 12h.01"/><path d="M12 3h.01"/><path d="M12 16v.01"/><path d="M16 12h1"/><path d="M21 12v.01"/><path d="M12 21v-1"/>
+        </svg>
+        QR &amp; Invites
+      </button>
+      <button class="tab-btn" data-tab="tab-lineup">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 11h1a3 3 0 0 1 0 6h-1"/><path d="M9 12v6"/><path d="M13 12v6"/><path d="M14 7.5c-1 0-1.44.5-3 .5s-2-.5-3-.5-1.72.5-2.5.5a2.5 2.5 0 0 1 0-5c.78 0 1.57.5 2.5.5S9.44 3 11 3s2 .5 3 .5 1.72-.5 2.5-.5a2.5 2.5 0 0 1 0 5c-.78 0-1.5-.5-2.5-.5Z"/><path d="M5 8v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V8"/>
+        </svg>
+        Flight &amp; Event (<span id="count-beers-tab">0</span>)
+      </button>
+      <button class="tab-btn" data-tab="tab-results">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>
+        </svg>
+        Results &amp; Reveal
+      </button>
+    </nav>
+
+    <!-- TAB 1: Live Control Center -->
+    <div id="tab-live" class="tab-pane">
+      <!-- Interactive Round Stepper Strip -->
+      <div id="round-stepper-strip" class="round-stepper-strip"></div>
+
+      <div class="host-grid">
+        
+        <!-- Left: Active Pouring Card -->
+        <div>
+          <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; flex-wrap: wrap; gap: 10px;">
+              <span class="badge badge-amber" id="host-round-badge">Round 1 of 4</span>
+              <span class="mode-indicator" style="color: var(--amber-400);">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+                Host Eyes Only — Identity Masked on Guest Phones
+              </span>
+            </div>
+
+            <!-- Secret Beer Details for Host -->
+            <div class="host-secret-beer-box">
+              <img id="host-beer-img" src="" alt="Beer artwork" class="host-secret-beer-img">
+              <div style="flex: 1; min-width: 0;">
+                <div style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--amber-400); font-weight: 800; margin-bottom: 2px;">
+                  Now Pouring (Blind)
+                </div>
+                <div id="host-beer-name" style="font-size: 1.55rem; font-weight: 800; letter-spacing: -0.03em; color: var(--text-primary); line-height: 1.2;">—</div>
+                <div id="host-beer-brewery" style="font-size: 1rem; color: var(--text-secondary); font-weight: 600; margin-top: 2px;">—</div>
+                <div id="host-beer-meta" style="font-size: 0.82rem; color: var(--text-muted); margin-top: 6px;">—</div>
+              </div>
+            </div>
+
+            <!-- Live Submission Progress Bar -->
+            <div style="margin-bottom: 22px;">
+              <div style="display: flex; justify-content: space-between; font-size: 0.84rem; font-weight: 700; margin-bottom: 8px;">
+                <span style="color: var(--text-secondary);">Round Rating Progress</span>
+                <span id="label-ratings-progress" style="font-family: var(--font-mono); color: var(--amber-400);">0 / 0 (0%)</span>
+              </div>
+              <div style="width: 100%; height: 10px; background: rgba(255, 255, 255, 0.06); border-radius: var(--radius-full); overflow: hidden; border: 1px solid var(--border-subtle);">
+                <div id="bar-ratings-progress" style="height: 100%; width: 0%; background: linear-gradient(90deg, var(--amber-500), var(--emerald-400)); transition: width 0.35s cubic-bezier(0.16, 1, 0.3, 1);"></div>
+              </div>
+            </div>
+
+            <!-- Action Controls -->
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+              <button id="btn-host-prev-round" class="btn btn-secondary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="m15 18-6-6 6-6"/>
+                </svg>
+                Prev Pour
+              </button>
+              <button id="btn-host-next-round" class="btn btn-primary" style="flex: 1;">
+                Advance to Next Pour
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="m9 18 6-6-6-6"/>
+                </svg>
+              </button>
+              <button id="btn-host-reveal" class="btn btn-success">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>
+                </svg>
+                Reveal All Beers
+              </button>
+            </div>
+
+            <div id="pending-warning" style="display: none; margin-top: 14px; padding: 10px 14px; border-radius: var(--radius-sm); background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.2); font-size: 0.8rem; color: var(--amber-300);">
+              Some tasters are still considering their score. You can wait or advance whenever the next pour is ready.
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Live Participant Roster -->
+        <div>
+          <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <h3 style="font-size: 1.05rem; font-weight: 800;">Tasting Room (<span id="count-roster">0</span>)</h3>
+              <span class="badge badge-subtle">
+                <span class="pulse-dot" style="width: 6px; height: 6px;"></span>
+                Live Sync
+              </span>
+            </div>
+            <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 16px;">
+              Real-time rating status for the active round.
+            </p>
+            <div class="participant-roster-list" id="participant-roster-list">
+              <!-- Populated via JS -->
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- TAB 2: QR Code & Invites -->
+    <div id="tab-qr" class="tab-pane" style="display: none;">
+      <div class="card" style="max-width: 540px; margin: 0 auto; text-align: center; padding: 32px 28px;">
+        <span class="badge badge-amber" style="margin-bottom: 10px;">Zero-Install Web App</span>
+        <h2 style="font-size: 1.65rem; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 6px;">Scan to Join Tasting</h2>
+        <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 20px;">
+          Point any phone camera at the QR code below to join the flight immediately.
+        </p>
+
+        <div class="qr-box" id="host-qr-container">
+          <img id="host-qr-img" src="" alt="Scan QR Code to Join" style="width: 260px; height: 260px; display: block;">
+        </div>
+
+        <div style="margin-top: 12px; text-align: left;">
+          <label class="form-label" for="input-join-url">Join URL (edit IP/domain to regenerate QR code)</label>
+          <div style="display: flex; gap: 8px;">
+            <input type="text" id="input-join-url" class="form-input" style="margin-bottom: 0; font-family: var(--font-mono); font-size: 0.84rem;">
+            <button id="btn-copy-join-url" class="btn btn-primary">Copy Link</button>
+          </div>
+          <div id="crostini-ip-notice" style="display: none; margin-top: 14px; padding: 12px 14px; border-radius: var(--radius-md); background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.28); font-size: 0.8rem; color: var(--text-secondary); line-height: 1.45;">
+            <strong style="color: var(--amber-400); display: block; margin-bottom: 4px;">Running inside ChromeOS Linux (100.115.92.x)?</strong>
+            <code>100.115.92.x</code> is an internal virtual container IP only reachable on this Chromebook. To allow phones on your Wi-Fi to connect:<br>
+            1. In ChromeOS <strong>Settings → Developers → Linux → Port forwarding</strong>, add port <strong>8080 (TCP)</strong>.<br>
+            2. Replace <code>100.115.92.x</code> above with your Chromebook's Wi-Fi IP (e.g. <code>192.168.1.x</code>) — the QR code will update automatically.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: Flight Lineup & Event Settings -->
+    <div id="tab-lineup" class="tab-pane" style="display: none;">
+      <div class="host-grid">
+        
+        <!-- Left: Flight Order + Event Metadata -->
+        <div>
+          <!-- Event Details Card -->
+          <div class="card">
+            <h3 style="font-size: 1.08rem; font-weight: 800; margin-bottom: 14px;">Event Theme &amp; Details</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+              <div>
+                <label class="form-label" for="edit-event-title">Event Title</label>
+                <input type="text" id="edit-event-title" class="form-input" style="margin-bottom: 12px;">
+              </div>
+              <div>
+                <label class="form-label" for="edit-event-theme">Tasting Theme</label>
+                <input type="text" id="edit-event-theme" class="form-input" placeholder="e.g. Midwest Hazy IPAs" style="margin-bottom: 12px;">
+              </div>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 12px;">
+              <div style="flex: 1;">
+                <label class="form-label" for="edit-event-date">Event Date</label>
+                <input type="date" id="edit-event-date" class="form-input" style="margin-bottom: 0;">
+              </div>
+              <button id="btn-save-event-details" class="btn btn-secondary">Save Event Details</button>
+            </div>
+          </div>
+
+          <!-- Lineup List Card -->
+          <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+              <div>
+                <h3 style="font-size: 1.08rem; font-weight: 800;">Blind Pouring Order</h3>
+                <p style="font-size: 0.78rem; color: var(--text-muted);">Beers are poured in this exact sequence</p>
+              </div>
+            </div>
+            <div id="lineup-table-container">
+              <!-- Populated via JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Add Beer Form -->
+        <div>
+          <div class="card">
+            <h3 style="font-size: 1.08rem; font-weight: 800; margin-bottom: 16px;">Add Beer to Flight</h3>
+            
+            <label class="form-label" for="add-beer-name">Beer Name *</label>
+            <input type="text" id="add-beer-name" class="form-input" placeholder="e.g. Pliny the Elder">
+
+            <label class="form-label" for="add-beer-brewery">Brewery *</label>
+            <input type="text" id="add-beer-brewery" class="form-input" placeholder="e.g. Russian River Brewing">
+
+            <div style="display: grid; grid-template-columns: 1fr 110px; gap: 10px;">
+              <div>
+                <label class="form-label" for="add-beer-style">Style</label>
+                <input type="text" id="add-beer-style" class="form-input" placeholder="Double IPA">
+              </div>
+              <div>
+                <label class="form-label" for="add-beer-abv">ABV (%)</label>
+                <input type="number" step="0.1" id="add-beer-abv" class="form-input" placeholder="8.0">
+              </div>
+            </div>
+
+            <label class="form-label" for="add-beer-img">Bottle / Pour Image URL</label>
+            <input type="url" id="add-beer-img" class="form-input" placeholder="https://...">
+
+            <label class="form-label" for="add-beer-notes">Tasting Notes</label>
+            <textarea id="add-beer-notes" class="textarea-custom" placeholder="Hops, malt profile, or brewer notes..."></textarea>
+
+            <button id="btn-add-beer" class="btn btn-primary" style="width: 100%;">
+              Add Beer to Flight
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- TAB 4: Results & Superlatives -->
+    <div id="tab-results" class="tab-pane" style="display: none;">
+      <div id="host-reveal-results">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; flex-wrap: wrap; gap: 12px;">
+          <div>
+            <h2 style="font-size: 1.65rem; font-weight: 800; letter-spacing: -0.03em;">Flight Leaderboard &amp; Accolades</h2>
+            <p style="color: var(--text-secondary); font-size: 0.9rem;">Aggregated club scores, 0.25-increment histograms, and superlatives.</p>
+          </div>
+          <button id="btn-re-hide-reveal" class="btn btn-secondary btn-sm">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+            Return to Blind Mode
+          </button>
+        </div>
+
+        <div class="superlatives-grid" id="host-superlatives-grid"></div>
+        <div id="host-ranked-beers-list"></div>
+      </div>
+    </div>
+
+    <!-- Floating Toast Notification -->
+    <div id="toast-notification" class="toast-notification" role="status" aria-live="polite"></div>
+
+  </div>
+
+  <script src="/js/host.js"></script>
+</body>
+</html>

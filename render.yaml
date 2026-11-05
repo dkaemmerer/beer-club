@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: beer-club
+    runtime: python
+    plan: free
+    buildCommand: "echo 'No build step needed'"
+    startCommand: "python3 server.py"
