@@ -177,10 +177,34 @@ def seed_sample_event(force_reset: bool = False, event_id: str = "craft-showdown
 
 # ----------------- Events -----------------
 
-def get_event(event_id: str) -> Optional[Dict[str, Any]]:
+def resolve_event_id(identifier: str) -> Optional[str]:
+    """Resolves an event ID or falls back to the active 'craft-showdown' event."""
+    if not identifier:
+        identifier = "craft-showdown"
     conn = get_connection()
     cur = conn.cursor()
-    cur.execute("SELECT * FROM events WHERE id = ?", (event_id,))
+    cur.execute("SELECT id FROM events WHERE id = ?", (identifier,))
+    row = cur.fetchone()
+    if row:
+        conn.close()
+        return row["id"]
+    cur.execute("SELECT id FROM events WHERE id = 'craft-showdown'")
+    row = cur.fetchone()
+    if row:
+        conn.close()
+        return row["id"]
+    cur.execute("SELECT id FROM events ORDER BY created_at DESC LIMIT 1")
+    row = cur.fetchone()
+    conn.close()
+    return row["id"] if row else None
+
+def get_event(event_id: str) -> Optional[Dict[str, Any]]:
+    canonical_id = resolve_event_id(event_id)
+    if not canonical_id:
+        return None
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM events WHERE id = ?", (canonical_id,))
     row = cur.fetchone()
     conn.close()
     return dict(row) if row else None
@@ -223,38 +247,43 @@ def create_event(title: str, theme: str, date: str, beers_data: List[Dict[str, A
     return event_id
 
 def update_event_round(event_id: str, current_beer_index: int):
+    canonical_id = resolve_event_id(event_id) or event_id
     conn = get_connection()
     with conn:
         conn.execute("""
             UPDATE events SET current_beer_index = ? WHERE id = ?
-        """, (current_beer_index, event_id))
+        """, (current_beer_index, canonical_id))
     conn.close()
 
 def set_event_status(event_id: str, status: str):
+    canonical_id = resolve_event_id(event_id) or event_id
     conn = get_connection()
     with conn:
         conn.execute("""
             UPDATE events SET status = ? WHERE id = ?
-        """, (status, event_id))
+        """, (status, canonical_id))
     conn.close()
 
 def update_event_details(event_id: str, title: str, theme: str, date: str):
+    canonical_id = resolve_event_id(event_id) or event_id
+    clean_title = title.strip() or "Beer Tasting Night"
     conn = get_connection()
     with conn:
         conn.execute("""
             UPDATE events SET title = ?, theme = ?, date = ? WHERE id = ?
-        """, (title.strip(), theme.strip(), date.strip(), event_id))
+        """, (clean_title, theme.strip(), date.strip(), canonical_id))
     conn.close()
 
 def reset_event_blank(event_id: str = "craft-showdown"):
     """Wipes all beers, participants, and ratings for the event to start completely fresh."""
+    canonical_id = resolve_event_id(event_id) or event_id
     now = datetime.now().isoformat()
     today = datetime.now().strftime("%Y-%m-%d")
     conn = get_connection()
     with conn:
-        conn.execute("DELETE FROM ratings WHERE event_id = ?", (event_id,))
-        conn.execute("DELETE FROM participants WHERE event_id = ?", (event_id,))
-        conn.execute("DELETE FROM beers WHERE event_id = ?", (event_id,))
+        conn.execute("DELETE FROM ratings WHERE event_id = ?", (canonical_id,))
+        conn.execute("DELETE FROM participants WHERE event_id = ?", (canonical_id,))
+        conn.execute("DELETE FROM beers WHERE event_id = ?", (canonical_id,))
         conn.execute("""
             INSERT INTO events (id, title, theme, date, status, current_beer_index, created_at)
             VALUES (?, 'New Beer Club Event', '', ?, 'active', 1, ?)
@@ -264,30 +293,32 @@ def reset_event_blank(event_id: str = "craft-showdown"):
                 date = excluded.date,
                 status = 'active',
                 current_beer_index = 1
-        """, (event_id, today, now))
+        """, (canonical_id, today, now))
     conn.close()
 
 # ----------------- Beers -----------------
 
 def get_beers(event_id: str) -> List[Dict[str, Any]]:
+    canonical_id = resolve_event_id(event_id) or event_id
     conn = get_connection()
     cur = conn.cursor()
-    cur.execute("SELECT * FROM beers WHERE event_id = ? ORDER BY order_num ASC", (event_id,))
+    cur.execute("SELECT * FROM beers WHERE event_id = ? ORDER BY order_num ASC", (canonical_id,))
     rows = cur.fetchall()
     conn.close()
     return [dict(r) for r in rows]
 
 def add_beer(event_id: str, name: str, brewery: str, style: str = "", abv: float = 0.0, image_url: str = "", notes: str = "") -> str:
+    canonical_id = resolve_event_id(event_id) or event_id
     conn = get_connection()
     with conn:
         cur = conn.cursor()
-        cur.execute("SELECT COALESCE(MAX(order_num), 0) + 1 as next_order FROM beers WHERE event_id = ?", (event_id,))
+        cur.execute("SELECT COALESCE(MAX(order_num), 0) + 1 as next_order FROM beers WHERE event_id = ?", (canonical_id,))
         next_order = cur.fetchone()["next_order"]
         beer_id = str(uuid.uuid4())
         cur.execute("""
             INSERT INTO beers (id, event_id, order_num, name, brewery, style, abv, image_url, notes)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """, (beer_id, event_id, next_order, name, brewery, style, abv, image_url, notes))
+        """, (beer_id, canonical_id, next_order, name, brewery, style, abv, image_url, notes))
     conn.close()
     return beer_id
 
@@ -331,12 +362,13 @@ def move_beer(beer_id: str, direction: str):
 # ----------------- Participants -----------------
 
 def join_or_get_participant(event_id: str, name: str, avatar: str = "🍺", participant_id: Optional[str] = None) -> Dict[str, Any]:
+    canonical_id = resolve_event_id(event_id) or event_id
     conn = get_connection()
     now = datetime.now().isoformat()
     with conn:
         cur = conn.cursor()
         if participant_id:
-            cur.execute("SELECT * FROM participants WHERE id = ? AND event_id = ?", (participant_id, event_id))
+            cur.execute("SELECT * FROM participants WHERE id = ? AND event_id = ?", (participant_id, canonical_id))
             row = cur.fetchone()
             if row:
                 cur.execute("UPDATE participants SET name = ?, avatar = ?, last_active_at = ? WHERE id = ?", (name, avatar, now, participant_id))
@@ -346,16 +378,17 @@ def join_or_get_participant(event_id: str, name: str, avatar: str = "🍺", part
         cur.execute("""
             INSERT INTO participants (id, event_id, name, avatar, joined_at, last_active_at)
             VALUES (?, ?, ?, ?, ?, ?)
-        """, (new_id, event_id, name.strip(), avatar, now, now))
+        """, (new_id, canonical_id, name.strip(), avatar, now, now))
         cur.execute("SELECT * FROM participants WHERE id = ?", (new_id,))
         p = dict(cur.fetchone())
     conn.close()
     return p
 
 def get_participants(event_id: str) -> List[Dict[str, Any]]:
+    canonical_id = resolve_event_id(event_id) or event_id
     conn = get_connection()
     cur = conn.cursor()
-    cur.execute("SELECT * FROM participants WHERE event_id = ? ORDER BY joined_at ASC", (event_id,))
+    cur.execute("SELECT * FROM participants WHERE event_id = ? ORDER BY joined_at ASC", (canonical_id,))
     rows = cur.fetchall()
     conn.close()
     return [dict(r) for r in rows]
@@ -363,6 +396,7 @@ def get_participants(event_id: str) -> List[Dict[str, Any]]:
 # ----------------- Ratings -----------------
 
 def submit_rating(event_id: str, beer_id: str, participant_id: str, rating: float, tags: List[str] = None, notes: str = "") -> Dict[str, Any]:
+    canonical_id = resolve_event_id(event_id) or event_id
     # Round rating to nearest 0.25 between 1.0 and 5.0
     val = round(float(rating) * 4) / 4
     val = max(1.0, min(5.0, val))
@@ -382,17 +416,18 @@ def submit_rating(event_id: str, beer_id: str, participant_id: str, rating: floa
                 tags = excluded.tags,
                 notes = excluded.notes,
                 updated_at = excluded.updated_at
-        """, (rating_id, event_id, beer_id, participant_id, val, tags_json, notes, now, now))
+        """, (rating_id, canonical_id, beer_id, participant_id, val, tags_json, notes, now, now))
 
         cur.execute("""
             SELECT * FROM ratings WHERE event_id = ? AND beer_id = ? AND participant_id = ?
-        """, (event_id, beer_id, participant_id))
+        """, (canonical_id, beer_id, participant_id))
         result = dict(cur.fetchone())
         result["tags"] = json.loads(result["tags"]) if result["tags"] else []
     conn.close()
     return result
 
 def get_event_ratings(event_id: str) -> List[Dict[str, Any]]:
+    canonical_id = resolve_event_id(event_id) or event_id
     conn = get_connection()
     cur = conn.cursor()
     cur.execute("""
@@ -401,7 +436,7 @@ def get_event_ratings(event_id: str) -> List[Dict[str, Any]]:
         JOIN participants p ON r.participant_id = p.id
         JOIN beers b ON r.beer_id = b.id
         WHERE r.event_id = ?
-    """, (event_id,))
+    """, (canonical_id,))
     rows = cur.fetchall()
     conn.close()
     results = []
@@ -413,13 +448,14 @@ def get_event_ratings(event_id: str) -> List[Dict[str, Any]]:
 
 def get_participant_ratings(event_id: str, participant_id: str) -> Dict[str, Any]:
     """Returns a map of beer_id -> rating data for a single participant."""
+    canonical_id = resolve_event_id(event_id) or event_id
     conn = get_connection()
     cur = conn.cursor()
     cur.execute("""
         SELECT r.* FROM ratings r
         JOIN beers b ON r.beer_id = b.id
         WHERE r.event_id = ? AND r.participant_id = ?
-    """, (event_id, participant_id))
+    """, (canonical_id, participant_id))
     rows = cur.fetchall()
     conn.close()
     out = {}
@@ -435,6 +471,7 @@ def get_participant_state(event_id: str, participant_id: Optional[str] = None) -
     event = get_event(event_id)
     if not event:
         return None
+    event_id = event["id"]
 
     beers = get_beers(event_id)
     is_revealed = (event["status"] == "revealed")
@@ -507,6 +544,7 @@ def get_host_state(event_id: str) -> Optional[Dict[str, Any]]:
     event = get_event(event_id)
     if not event:
         return None
+    event_id = event["id"]
 
     beers = get_beers(event_id)
     participants = get_participants(event_id)

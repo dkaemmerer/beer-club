@@ -16,9 +16,9 @@ python3 server.py
 
 *(Or start with a completely blank slate from the command line using `python3 server.py --fresh`)*
 
-By default, the server listens on port **8080**:
+By default, the server listens on port **8080** with clean, simple URLs:
+* **Participant Mobile View:** [http://localhost:8080](http://localhost:8080) or [http://localhost:8080/join](http://localhost:8080/join)
 * **Host Control Dashboard:** [http://localhost:8080/host](http://localhost:8080/host)
-* **Participant Mobile View:** [http://localhost:8080/join](http://localhost:8080/join) (or scan the on-screen QR code)
 
 *(To run on a custom port, pass it as an argument: `python3 server.py 3000`)*
 
@@ -27,12 +27,19 @@ By default, the server listens on port **8080**:
 ## 📱 How It Works
 
 ### 1. Host Setup, Demo Event & QR Code Display
-* Open the **Host Dashboard** at `http://<your-host-domain-or-ip>:8080/host`.
+* Open the **Host Dashboard** at `https://<your-domain>/host` (or `http://<your-ip>:8080/host`).
+* **Workflow-Ordered Tabs:** The Host Dashboard tabs are arranged in chronological event order:
+  1. **Flight & Event** — Set your Event Title, Theme, Date (via a one-click calendar picker), and Beer Lineup.
+  2. **QR & Invites** — Display the scannable QR code, copy the Join URL, or tap **Share** to open your mobile device's native share sheet (SMS, email, AirDrop, etc.).
+  3. **Live Pour Control** — Orchestrate active blind rounds and monitor real-time guest ratings.
+  4. **Results & Reveal** — Unmask beers, histograms, club tasting notes, and superlatives.
 * **Demo Event vs. Custom Event:**
   * By default, the app comes pre-loaded with the **"Fall Brews"** (*Autumnal Themed Beer Flight*) demo event featuring 6 seasonal craft beers.
   * Clicking **"Demo Event"** in the top bar resets the app back to the *Fall Brews* flight at any time so hosts can do a dry run and learn how the app works before hosting.
-  * Clicking **"New Blank Event"** wipes all beers, participants, and ratings and opens the **Flight & Event** setup tab so the host can enter their own event title, theme, date (via an interactive calendar picker), and custom beer lineup.
-* Click the **"QR & Invites"** tab to display the scannable SVG QR code on a TV, tablet, or laptop screen. Editing the Join URL automatically regenerates the QR code in real time.
+  * Clicking **"New Blank Event"** wipes all beers, participants, and ratings and opens the **Flight & Event** setup tab so the host can enter their own event title, theme, date, and custom beer lineup.
+* **Simple Join URLs & Native Share:**
+  * Both `https://<your-domain>` and `https://<your-domain>/join` open the Participant view directly for the active event.
+  * On the **QR & Invites** tab, hosts can scan the QR code, click **Copy Link**, or click **Share** to open their phone's native share menu to text or email the invite link.
 * Guests scan the code with their phone camera, enter their display name, and pick a tasting badge (`🍺`, `🍻`, `🥨`, `🌾`, `👑`, etc.). Sessions persist in `localStorage` so screen locks or refreshes never lose their place.
 
 ### 2. Blind Tasting Rounds (Anti-Spoiler Protected)

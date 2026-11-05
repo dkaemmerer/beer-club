@@ -241,10 +241,11 @@
 
   async function fetchBasicEventMeta() {
     try {
-      const res = await fetch(`/api/events/${state.eventId}/state`);
+      const res = await fetch(`/api/events/${encodeURIComponent(state.eventId)}/state`);
       if (res.ok) {
         const data = await res.json();
         if (data.event) {
+          state.eventId = data.event.id || state.eventId;
           els.eventTitleDisplay.textContent = data.event.title;
           els.eventThemeDisplay.textContent = data.event.theme || 'Blind Tasting';
         }
@@ -315,11 +316,14 @@
 
   async function fetchState() {
     try {
-      const url = `/api/events/${state.eventId}/state?participant_id=${state.participantId || ''}`;
+      const url = `/api/events/${encodeURIComponent(state.eventId)}/state?participant_id=${encodeURIComponent(state.participantId || '')}`;
       const res = await fetch(url);
       if (!res.ok) throw new Error('Event not found');
       const data = await res.json();
 
+      if (data.event && data.event.id) {
+        state.eventId = data.event.id;
+      }
       state.eventData = data.event;
       state.beers = data.beers;
       state.isRevealed = data.is_revealed;

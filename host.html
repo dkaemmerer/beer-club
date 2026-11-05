@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Beer Club — Host Director</title>
+  <title>Beer Club — Host</title>
   <link rel="stylesheet" href="/style.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍺</text></svg>">
 </head>
@@ -49,11 +49,11 @@
 
     <!-- Segmented Navigation Bar -->
     <nav class="tabs-nav" aria-label="Host Sections">
-      <button class="tab-btn active" data-tab="tab-live">
+      <button class="tab-btn active" data-tab="tab-lineup">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="2"/><path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"/>
+          <path d="M17 11h1a3 3 0 0 1 0 6h-1"/><path d="M9 12v6"/><path d="M13 12v6"/><path d="M14 7.5c-1 0-1.44.5-3 .5s-2-.5-3-.5-1.72.5-2.5.5a2.5 2.5 0 0 1 0-5c.78 0 1.57.5 2.5.5S9.44 3 11 3s2 .5 3 .5 1.72-.5 2.5-.5a2.5 2.5 0 0 1 0 5c-.78 0-1.5-.5-2.5-.5Z"/><path d="M5 8v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V8"/>
         </svg>
-        Live Pour Control
+        Flight &amp; Event (<span id="count-beers-tab">0</span>)
       </button>
       <button class="tab-btn" data-tab="tab-qr">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -61,11 +61,11 @@
         </svg>
         QR &amp; Invites
       </button>
-      <button class="tab-btn" data-tab="tab-lineup">
+      <button class="tab-btn" data-tab="tab-live">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M17 11h1a3 3 0 0 1 0 6h-1"/><path d="M9 12v6"/><path d="M13 12v6"/><path d="M14 7.5c-1 0-1.44.5-3 .5s-2-.5-3-.5-1.72.5-2.5.5a2.5 2.5 0 0 1 0-5c.78 0 1.57.5 2.5.5S9.44 3 11 3s2 .5 3 .5 1.72-.5 2.5-.5a2.5 2.5 0 0 1 0 5c-.78 0-1.5-.5-2.5-.5Z"/><path d="M5 8v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V8"/>
+          <circle cx="12" cy="12" r="2"/><path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"/>
         </svg>
-        Flight &amp; Event (<span id="count-beers-tab">0</span>)
+        Live Pour Control
       </button>
       <button class="tab-btn" data-tab="tab-results">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -75,8 +75,8 @@
       </button>
     </nav>
 
-    <!-- TAB 1: Live Control Center -->
-    <div id="tab-live" class="tab-pane">
+    <!-- TAB: Live Control Center -->
+    <div id="tab-live" class="tab-pane" style="display: none;">
       <!-- Interactive Round Stepper Strip -->
       <div id="round-stepper-strip" class="round-stepper-strip"></div>
 
@@ -183,10 +183,17 @@
         </div>
 
         <div style="margin-top: 12px; text-align: left;">
-          <label class="form-label" for="input-join-url">Join URL (edit IP/domain to regenerate QR code)</label>
-          <div style="display: flex; gap: 8px;">
-            <input type="text" id="input-join-url" class="form-input" style="margin-bottom: 0; font-family: var(--font-mono); font-size: 0.84rem;">
+          <label class="form-label" for="input-join-url">Join URL</label>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <input type="text" id="input-join-url" class="form-input" style="margin-bottom: 0; flex: 1; min-width: 200px; font-family: var(--font-mono); font-size: 0.84rem;">
             <button id="btn-copy-join-url" class="btn btn-primary">Copy Link</button>
+            <button id="btn-share-join-url" class="btn btn-secondary" title="Share Join Link">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+              </svg>
+              Share
+            </button>
           </div>
           <div id="crostini-ip-notice" style="display: none; margin-top: 14px; padding: 12px 14px; border-radius: var(--radius-md); background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.28); font-size: 0.8rem; color: var(--text-secondary); line-height: 1.45;">
             <strong style="color: var(--amber-400); display: block; margin-bottom: 4px;">Running inside ChromeOS Linux (100.115.92.x)?</strong>
@@ -198,8 +205,8 @@
       </div>
     </div>
 
-    <!-- TAB 3: Flight Lineup & Event Settings -->
-    <div id="tab-lineup" class="tab-pane" style="display: none;">
+    <!-- TAB 1: Flight Lineup & Event Settings -->
+    <div id="tab-lineup" class="tab-pane">
       <div class="host-grid">
         
         <!-- Left: Flight Order + Event Metadata -->

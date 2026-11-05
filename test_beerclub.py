@@ -289,5 +289,24 @@ class TestBeerClub(unittest.TestCase):
         self.assertEqual(len(h_state["beers"]), 1)
         self.assertIn("analytics", p_state)
 
+    # 8. Simple Routes (/, /join, /host) and Tab Titles
+    def test_08_simple_routes_and_titles(self):
+        base_url = f"http://127.0.0.1:{TEST_PORT}"
+        db.seed_sample_event(force_reset=True, event_id="craft-showdown")
+
+        # Root '/' and '/join' both serve Participant view with title "Beer Club — Participant"
+        for route in ("/", "/join"):
+            with urllib.request.urlopen(f"{base_url}{route}") as res:
+                self.assertEqual(res.status, 200)
+                html = res.read().decode()
+                self.assertIn("<title>Beer Club — Participant</title>", html)
+
+        # '/host' serves Host view with title "Beer Club — Host"
+        with urllib.request.urlopen(f"{base_url}/host") as res:
+            self.assertEqual(res.status, 200)
+            html = res.read().decode()
+            self.assertIn("<title>Beer Club — Host</title>", html)
+            self.assertIn('id="btn-share-join-url"', html)
+
 if __name__ == "__main__":
     unittest.main()

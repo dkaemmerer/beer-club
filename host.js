@@ -57,6 +57,7 @@
     hostQrImg: document.getElementById('host-qr-img'),
     inputJoinUrl: document.getElementById('input-join-url'),
     btnCopyJoinUrl: document.getElementById('btn-copy-join-url'),
+    btnShareJoinUrl: document.getElementById('btn-share-join-url'),
     crostiniIpNotice: document.getElementById('crostini-ip-notice'),
 
     // Lineup & Event Tab
@@ -150,6 +151,31 @@
       showToast('Join link copied to clipboard');
     });
 
+    if (els.btnShareJoinUrl) {
+      els.btnShareJoinUrl.addEventListener('click', async () => {
+        const shareUrl = els.inputJoinUrl.value.trim() || `${window.location.origin}/join`;
+        const eventTitle = (state.eventData && state.eventData.title) ? state.eventData.title : 'Beer Club';
+        const shareData = {
+          title: `${eventTitle} — Beer Club`,
+          text: `Join our "${eventTitle}" blind beer tasting flight!`,
+          url: shareUrl
+        };
+        if (navigator.share) {
+          try {
+            await navigator.share(shareData);
+          } catch (err) {
+            if (err && err.name !== 'AbortError') {
+              navigator.clipboard.writeText(shareUrl);
+              showToast('Join link copied to clipboard');
+            }
+          }
+        } else {
+          navigator.clipboard.writeText(shareUrl);
+          showToast('Join link copied to clipboard (native share menu requires mobile device)');
+        }
+      });
+    }
+
     els.inputJoinUrl.addEventListener('input', () => {
       const val = els.inputJoinUrl.value.trim();
       if (val) {
@@ -222,11 +248,13 @@
     const host = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && state.lanIp !== '127.0.0.1'
       ? state.lanIp
       : window.location.hostname;
-    
-    const joinUrl = `${window.location.protocol}//${host}${port}/join?event=${state.eventId}`;
-    els.inputJoinUrl.value = joinUrl;
-    els.hostQrImg.src = `/api/qrcode?text=${encodeURIComponent(joinUrl)}`;
-    els.linkParticipantView.href = `/join?event=${state.eventId}`;
+
+    const joinUrl = `${window.location.protocol}//${host}${port}/join`;
+    if (document.activeElement !== els.inputJoinUrl) {
+      els.inputJoinUrl.value = joinUrl;
+      els.hostQrImg.src = `/api/qrcode?text=${encodeURIComponent(joinUrl)}`;
+    }
+    els.linkParticipantView.href = `/join`;
 
     if (els.crostiniIpNotice) {
       els.crostiniIpNotice.style.display = host.startsWith('100.115.92.') ? 'block' : 'none';
@@ -240,6 +268,9 @@
       const data = await res.json();
 
       const wasFirstLoad = (state.eventData === null);
+      if (data.event && data.event.id) {
+        state.eventId = data.event.id;
+      }
       state.eventData = data.event;
       state.beers = data.beers;
       state.participants = data.participants;
@@ -248,6 +279,7 @@
       state.analytics = data.analytics;
 
       renderHeader();
+      updateQrCode();
       renderRoundStepper();
       renderLiveRound();
       renderRoster();

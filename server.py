@@ -125,7 +125,8 @@ class BeerClubHandler(SimpleHTTPRequestHandler):
         # SSE Stream
         if path.startswith("/api/events/") and path.endswith("/stream"):
             parts = path.strip("/").split("/")
-            event_id = parts[2]
+            raw_id = urllib.parse.unquote(parts[2])
+            event_id = db.resolve_event_id(raw_id) or raw_id
             self.handle_sse_stream(event_id)
             return
 
@@ -162,7 +163,8 @@ class BeerClubHandler(SimpleHTTPRequestHandler):
         # Participant state (Anti-spoiler compliant)
         if path.startswith("/api/events/") and path.endswith("/state"):
             parts = path.strip("/").split("/")
-            event_id = parts[2]
+            raw_id = urllib.parse.unquote(parts[2])
+            event_id = db.resolve_event_id(raw_id) or raw_id
             participant_id = query.get("participant_id", [None])[0]
             state = db.get_participant_state(event_id, participant_id)
             if not state:
@@ -174,7 +176,8 @@ class BeerClubHandler(SimpleHTTPRequestHandler):
         # Host state (Full access)
         if path.startswith("/api/events/") and path.endswith("/host_state"):
             parts = path.strip("/").split("/")
-            event_id = parts[2]
+            raw_id = urllib.parse.unquote(parts[2])
+            event_id = db.resolve_event_id(raw_id) or raw_id
             state = db.get_host_state(event_id)
             if not state:
                 self.send_error_json("Event not found", 404)
@@ -213,7 +216,8 @@ class BeerClubHandler(SimpleHTTPRequestHandler):
 
         # Participant join
         if path.startswith("/api/events/") and path.endswith("/join"):
-            event_id = path.strip("/").split("/")[2]
+            raw_id = urllib.parse.unquote(path.strip("/").split("/")[2])
+            event_id = db.resolve_event_id(raw_id) or raw_id
             name = data.get("name", "").strip()
             avatar = data.get("avatar", "🍺")
             p_id = data.get("participant_id")
@@ -232,7 +236,8 @@ class BeerClubHandler(SimpleHTTPRequestHandler):
 
         # Submit / edit rating
         if path.startswith("/api/events/") and path.endswith("/rate"):
-            event_id = path.strip("/").split("/")[2]
+            raw_id = urllib.parse.unquote(path.strip("/").split("/")[2])
+            event_id = db.resolve_event_id(raw_id) or raw_id
             p_id = data.get("participant_id")
             beer_id = data.get("beer_id")
             rating = data.get("rating")
@@ -254,7 +259,8 @@ class BeerClubHandler(SimpleHTTPRequestHandler):
 
         # Host change active round
         if path.startswith("/api/events/") and path.endswith("/round"):
-            event_id = path.strip("/").split("/")[2]
+            raw_id = urllib.parse.unquote(path.strip("/").split("/")[2])
+            event_id = db.resolve_event_id(raw_id) or raw_id
             current_beer_index = int(data.get("current_beer_index", 1))
             db.update_event_round(event_id, current_beer_index)
             sse_manager.broadcast(event_id, "round_change", {
@@ -265,7 +271,8 @@ class BeerClubHandler(SimpleHTTPRequestHandler):
 
         # Host reveal
         if path.startswith("/api/events/") and path.endswith("/reveal"):
-            event_id = path.strip("/").split("/")[2]
+            raw_id = urllib.parse.unquote(path.strip("/").split("/")[2])
+            event_id = db.resolve_event_id(raw_id) or raw_id
             db.set_event_status(event_id, "revealed")
             sse_manager.broadcast(event_id, "reveal", {
                 "status": "revealed"
@@ -275,7 +282,8 @@ class BeerClubHandler(SimpleHTTPRequestHandler):
 
         # Host reset / change status
         if path.startswith("/api/events/") and path.endswith("/status"):
-            event_id = path.strip("/").split("/")[2]
+            raw_id = urllib.parse.unquote(path.strip("/").split("/")[2])
+            event_id = db.resolve_event_id(raw_id) or raw_id
             status = data.get("status", "active")
             db.set_event_status(event_id, status)
             sse_manager.broadcast(event_id, "status_change", {
@@ -286,7 +294,8 @@ class BeerClubHandler(SimpleHTTPRequestHandler):
 
         # Host add beer
         if path.startswith("/api/events/") and path.endswith("/beers"):
-            event_id = path.strip("/").split("/")[2]
+            raw_id = urllib.parse.unquote(path.strip("/").split("/")[2])
+            event_id = db.resolve_event_id(raw_id) or raw_id
             name = data.get("name", "New Beer")
             brewery = data.get("brewery", "")
             style = data.get("style", "")
@@ -300,7 +309,8 @@ class BeerClubHandler(SimpleHTTPRequestHandler):
 
         # Host update event details
         if path.startswith("/api/events/") and path.endswith("/details"):
-            event_id = path.strip("/").split("/")[2]
+            raw_id = urllib.parse.unquote(path.strip("/").split("/")[2])
+            event_id = db.resolve_event_id(raw_id) or raw_id
             title = data.get("title", "Beer Tasting Night")
             theme = data.get("theme", "")
             date = data.get("date", "")
@@ -319,7 +329,8 @@ class BeerClubHandler(SimpleHTTPRequestHandler):
 
         # Host reset event to blank slate
         if path.startswith("/api/events/") and path.endswith("/reset"):
-            event_id = path.strip("/").split("/")[2]
+            raw_id = urllib.parse.unquote(path.strip("/").split("/")[2])
+            event_id = db.resolve_event_id(raw_id) or raw_id
             db.reset_event_blank(event_id)
             sse_manager.broadcast(event_id, "event_reset", {"reset": True})
             self.send_json({"reset": True, "event_id": event_id})
@@ -327,7 +338,8 @@ class BeerClubHandler(SimpleHTTPRequestHandler):
 
         # Host load / reset to default example flight ("Fall Brews")
         if path.startswith("/api/events/") and path.endswith("/reset_sample"):
-            event_id = path.strip("/").split("/")[2]
+            raw_id = urllib.parse.unquote(path.strip("/").split("/")[2])
+            event_id = db.resolve_event_id(raw_id) or raw_id
             db.seed_sample_event(force_reset=True, event_id=event_id)
             sse_manager.broadcast(event_id, "event_reset", {"reset_sample": True})
             self.send_json({"reset_sample": True, "event_id": event_id})
@@ -390,8 +402,8 @@ def run_server(port=PORT, fresh=False):
     print(" 🍻 BEER CLUB SERVER STARTED")
     print("=" * 60)
     print(f" Local URL:        http://localhost:{port}")
-    print(f" Participant URL:  http://{lan_ip}:{port}/join?event=craft-showdown")
-    print(f" Host Dashboard:   http://{lan_ip}:{port}/host?event=craft-showdown")
+    print(f" Participant URL:  http://{lan_ip}:{port}/join")
+    print(f" Host Dashboard:   http://{lan_ip}:{port}/host")
     print("=" * 60)
     httpd.serve_forever()
 
