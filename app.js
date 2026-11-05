@@ -264,7 +264,7 @@
   function updateParticipantBadge() {
     els.participantBadge.style.display = 'inline-flex';
     els.participantBadge.textContent = `${state.participantAvatar} ${state.participantName}`;
-    els.btnOpenDrawer.style.display = 'inline-flex';
+    els.btnOpenDrawer.style.display = state.isRevealed ? 'none' : 'inline-flex';
   }
 
   async function handleJoin() {
@@ -359,6 +359,14 @@
     }
     const ratedCount = Object.keys(state.myRatings).length;
     els.drawerRoundLabel.textContent = `${ratedCount}/${state.beers.length}`;
+    if (state.participantId) {
+      els.btnOpenDrawer.style.display = state.isRevealed ? 'none' : 'inline-flex';
+    } else {
+      els.btnOpenDrawer.style.display = 'none';
+    }
+    if (state.isRevealed) {
+      closeDrawer();
+    }
   }
 
   function renderCurrentBeerScreen() {
@@ -509,6 +517,7 @@
 
   // Drawer
   function openDrawer() {
+    if (state.isRevealed) return;
     renderDrawerList();
     els.drawerBackdrop.classList.add('open');
     els.drawerAllRounds.classList.add('open');
@@ -551,12 +560,10 @@
       `;
 
       item.addEventListener('click', () => {
+        if (state.isRevealed) return;
         state.viewingBeerIndex = b.order_num;
         // If tapping a previously rated round in the drawer, open the slider directly so they can adjust if desired
         state.isEditingRating = Boolean(state.myRatings[b.id]);
-        if (state.isRevealed) {
-          state.isRevealed = false;
-        }
         renderCurrentBeerScreen();
         closeDrawer();
       });
@@ -567,6 +574,8 @@
 
   // Reveal & Analytics
   function renderRevealView(analytics) {
+    closeDrawer();
+    els.btnOpenDrawer.style.display = 'none';
     els.viewJoin.style.display = 'none';
     els.viewTasting.style.display = 'none';
     els.viewWaiting.style.display = 'none';

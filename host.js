@@ -28,6 +28,7 @@
     hostEventTitle: document.getElementById('host-event-title'),
     hostEventTheme: document.getElementById('host-event-theme'),
     badgeHostStatus: document.getElementById('badge-host-status'),
+    btnLoadSampleEvent: document.getElementById('btn-load-sample-event'),
     btnResetBlankEvent: document.getElementById('btn-reset-blank-event'),
     linkParticipantView: document.getElementById('link-participant-view'),
     countBeersTab: document.getElementById('count-beers-tab'),
@@ -123,8 +124,24 @@
     els.btnHostReveal.addEventListener('click', handleReveal);
     els.btnReHideReveal.addEventListener('click', handleReLock);
 
+    if (els.btnLoadSampleEvent) {
+      els.btnLoadSampleEvent.addEventListener('click', handleLoadSampleEvent);
+    }
+
     if (els.btnResetBlankEvent) {
       els.btnResetBlankEvent.addEventListener('click', handleResetBlankEvent);
+    }
+
+    if (els.editEventDate) {
+      els.editEventDate.addEventListener('click', () => {
+        if (typeof els.editEventDate.showPicker === 'function') {
+          try {
+            els.editEventDate.showPicker();
+          } catch (_) {
+            // Ignore if already open or unsupported
+          }
+        }
+      });
     }
 
     els.btnCopyJoinUrl.addEventListener('click', () => {
@@ -145,6 +162,25 @@
     }
 
     els.btnAddBeer.addEventListener('click', handleAddBeer);
+  }
+
+  async function handleLoadSampleEvent() {
+    if (!confirm('Reset the app to the "Fall Brews" Demo Event (6 beers)? This will reset the lineup, participants, and ratings so you can do a fresh dry run.')) {
+      return;
+    }
+    try {
+      const res = await fetch(`/api/events/${state.eventId}/reset_sample`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({})
+      });
+      if (res.ok) {
+        await loadHostState();
+        showToast('Loaded "Fall Brews" Demo Event!');
+      }
+    } catch (err) {
+      console.error('Load sample event failed:', err);
+    }
   }
 
   async function handleResetBlankEvent() {

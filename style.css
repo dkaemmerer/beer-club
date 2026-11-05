@@ -646,6 +646,21 @@ html, body {
   margin-bottom: 16px;
 }
 
+input[type="date"].form-input {
+  color-scheme: dark;
+  cursor: pointer;
+}
+
+input[type="date"].form-input::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.85;
+  transition: opacity 0.15s ease;
+}
+
+input[type="date"].form-input:hover::-webkit-calendar-picker-indicator {
+  opacity: 1;
+}
+
 .textarea-custom {
   resize: vertical;
   min-height: 68px;

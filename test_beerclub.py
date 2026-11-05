@@ -97,14 +97,14 @@ class TestBeerClub(unittest.TestCase):
 
         # Host view MUST see the real beer names
         host_state = db.get_host_state(event_id)
-        self.assertEqual(host_state["beers"][0]["name"], "Two Hearted Ale")
+        self.assertEqual(host_state["beers"][0]["name"], "Oktoberfest Märzen")
 
         # Reveal the event
         db.set_event_status(event_id, "revealed")
         revealed_state = db.get_participant_state(event_id, p["id"])
         self.assertTrue(revealed_state["is_revealed"])
-        self.assertEqual(revealed_state["beers"][0]["name"], "Two Hearted Ale")
-        self.assertEqual(revealed_state["beers"][0]["brewery"], "Bell's Brewery")
+        self.assertEqual(revealed_state["beers"][0]["name"], "Oktoberfest Märzen")
+        self.assertEqual(revealed_state["beers"][0]["brewery"], "Paulaner Brauerei")
 
     # 3. 0.25 Increment Rating Validation
     def test_03_rating_increments_and_rounding(self):

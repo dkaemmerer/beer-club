@@ -325,6 +325,14 @@ class BeerClubHandler(SimpleHTTPRequestHandler):
             self.send_json({"reset": True, "event_id": event_id})
             return
 
+        # Host load / reset to default example flight ("Fall Brews")
+        if path.startswith("/api/events/") and path.endswith("/reset_sample"):
+            event_id = path.strip("/").split("/")[2]
+            db.seed_sample_event(force_reset=True, event_id=event_id)
+            sse_manager.broadcast(event_id, "event_reset", {"reset_sample": True})
+            self.send_json({"reset_sample": True, "event_id": event_id})
+            return
+
         self.send_error_json("Unknown endpoint", 404)
 
     def do_DELETE(self):

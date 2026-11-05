@@ -78,59 +78,101 @@ def init_db():
         conn.execute("DELETE FROM ratings WHERE beer_id NOT IN (SELECT id FROM beers);")
     conn.close()
 
-def seed_sample_event():
-    """Seeds a realistic sample event if no events exist yet."""
+DEFAULT_SAMPLE_BEERS = [
+    (
+        1,
+        "Oktoberfest Märzen",
+        "Paulaner Brauerei",
+        "Märzen / German Amber Lager",
+        5.8,
+        "https://www.totalwine.com/dynamic/x1000,12pk/images/12229127/12229127-2-fr.png",
+        "Deep amber pour with rich toasted bread crust, soft caramel malt, and a smooth, incredibly clean German lager finish."
+    ),
+    (
+        2,
+        "Oktoberfest",
+        "Sierra Nevada Brewing Co.",
+        "Festive Festbier / Märzen",
+        6.0,
+        "https://norfolkwineandspirits.com/wp-content/uploads/2020/08/sierra-nevada-oktoberfest-12-oz-bottled-890x890-1.jpg",
+        "Golden-amber, featuring toasted biscuit malts, a subtle floral-herbal hop aroma, and a crisp, dry autumn finish."
+    ),
+    (
+        3,
+        "Pumking",
+        "Southern Tier Brewing Company",
+        "Imperial Pumpkin Ale",
+        8.6,
+        "https://stbcbeer.com/wp-content/uploads/2019/08/STBC_Pumking_2023_12oz-Bottle_Render_face.png",
+        "Pours golden copper with bold aromas of fresh pumpkin pie crust, nutmeg, cinnamon, vanilla, and buttery brown sugar."
+    ),
+    (
+        4,
+        "Night Owl Pumpkin Ale",
+        "Elysian Brewing Company",
+        "Pumpkin Ale",
+        6.7,
+        "https://halftimebeverage.com/media/catalog/product/cache/f3020b7489dcfc4d1d147cf4dad07b7f/1/0/10243_1.png",
+        "Brewed with real pumpkin seeds and flesh; layered with cinnamon, nutmeg, clove, and a sweet, toasted malt body."
+    ),
+    (
+        5,
+        "Nosferatu",
+        "Great Lakes Brewing Co.",
+        "Imperial Red Ale",
+        9.0,
+        "https://thefullpint.com/wp-content/uploads/2009/10/Nosferatu_BottleGlass.jpg",
+        "Ruby-red body with massive roasted caramel malt sweetness balanced by a sharp, piney, resinous hop bitterness ideal for cool fall nights."
+    ),
+    (
+        6,
+        "Celebrator",
+        "Brauerei Aying",
+        "Doppelbock",
+        6.7,
+        "https://halftimebeverage.com/media/catalog/product/cache/f3020b7489dcfc4d1d147cf4dad07b7f/4/4/4415.png",
+        "Dark brown with mahogany highlights. Flavors of dark dried fruit (figs, raisins), toasted rye bread, dark chocolate, and warming malt complexity."
+    ),
+]
+
+def seed_sample_event(force_reset: bool = False, event_id: str = "craft-showdown"):
+    """Seeds the default 'Fall Brews' sample event if no events exist yet (or if force_reset=True)."""
     conn = get_connection()
     cur = conn.cursor()
     cur.execute("SELECT COUNT(*) as count FROM events")
-    if cur.fetchone()["count"] == 0:
-        event_id = "craft-showdown"
+    should_seed = force_reset or (cur.fetchone()["count"] == 0)
+    if should_seed:
         now = datetime.now().isoformat()
-        cur.execute("""
-            INSERT INTO events (id, title, theme, date, status, current_beer_index, created_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        """, (
-            event_id,
-            "Friday Night Craft Showdown",
-            "American IPAs & Pale Ales",
-            datetime.now().strftime("%Y-%m-%d"),
-            "active",
-            1,
-            now
-        ))
+        today = datetime.now().strftime("%Y-%m-%d")
+        with conn:
+            conn.execute("DELETE FROM ratings WHERE event_id = ?", (event_id,))
+            conn.execute("DELETE FROM participants WHERE event_id = ?", (event_id,))
+            conn.execute("DELETE FROM beers WHERE event_id = ?", (event_id,))
+            conn.execute("""
+                INSERT INTO events (id, title, theme, date, status, current_beer_index, created_at)
+                VALUES (?, ?, ?, ?, 'active', 1, ?)
+                ON CONFLICT(id) DO UPDATE SET
+                    title = excluded.title,
+                    theme = excluded.theme,
+                    date = excluded.date,
+                    status = 'active',
+                    current_beer_index = 1
+            """, (
+                event_id,
+                "Fall Brews",
+                "Autumnal Themed Beer Flight",
+                today,
+                now
+            ))
 
-        sample_beers = [
-            (
-                str(uuid.uuid4()), event_id, 1,
-                "Two Hearted Ale", "Bell's Brewery", "American IPA", 7.0,
-                "https://images.unsplash.com/photo-1535958636474-b021ee887b13?auto=format&fit=crop&w=600&q=80",
-                "Bursting with 100% Centennial hops aromas of pine and grapefruit."
-            ),
-            (
-                str(uuid.uuid4()), event_id, 2,
-                "Zombie Dust", "3 Floyds Brewing", "Pale Ale", 6.5,
-                "https://images.unsplash.com/photo-1566633806327-68e152aaf26d?auto=format&fit=crop&w=600&q=80",
-                "Medium-bodied single-hop pale ale brewed with intensely aromatic Citra hops."
-            ),
-            (
-                str(uuid.uuid4()), event_id, 3,
-                "Sculpin", "Ballast Point Brewing", "IPA", 7.0,
-                "https://images.unsplash.com/photo-1608270191599-2826cf8d43d1?auto=format&fit=crop&w=600&q=80",
-                "A showcase of bright apricot, peach, mango, and lemon notes."
-            ),
-            (
-                str(uuid.uuid4()), event_id, 4,
-                "Fresh Squeezed", "Deschutes Brewery", "IPA", 6.4,
-                "https://images.unsplash.com/photo-1518176258769-f227c798150e?auto=format&fit=crop&w=600&q=80",
-                "Mouthwateringly juicy IPA loaded with Citra and Mosaic hops."
-            ),
-        ]
-
-        cur.executemany("""
-            INSERT INTO beers (id, event_id, order_num, name, brewery, style, abv, image_url, notes)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """, sample_beers)
-        conn.commit()
+            rows = [
+                (str(uuid.uuid4()), event_id, order_num, name, brewery, style, abv, image_url, notes)
+                for (order_num, name, brewery, style, abv, image_url, notes) in DEFAULT_SAMPLE_BEERS
+            ]
+            conn.executemany("""
+                INSERT INTO beers (id, event_id, order_num, name, brewery, style, abv, image_url, notes)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, rows)
     conn.close()
 
 # ----------------- Events -----------------
