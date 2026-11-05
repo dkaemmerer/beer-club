@@ -445,18 +445,18 @@
 
     state.beers.forEach((b, idx) => {
       const row = document.createElement('div');
-      row.className = 'history-item';
+      row.className = 'history-item lineup-item';
       row.style.cursor = 'default';
       row.innerHTML = `
-        <div class="history-item-left">
+        <div class="history-item-left" style="flex: 1; min-width: 0;">
           <div class="history-round-num">#${b.order_num}</div>
-          ${b.image_url ? `<img src="${b.image_url}" style="width: 44px; height: 44px; border-radius: 8px; object-fit: cover; border: 1px solid var(--border-subtle);">` : ''}
-          <div style="min-width: 0;">
-            <div style="font-weight: 700; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${b.name}</div>
-            <div style="font-size: 0.78rem; color: var(--amber-400);">${b.brewery}${b.style ? ' • ' + b.style : ''}${b.abv ? ' • ' + b.abv + '%' : ''}</div>
+          ${b.image_url ? `<img src="${b.image_url}" class="lineup-beer-thumb" alt="${escapeHtml(b.name)}">` : ''}
+          <div style="flex: 1; min-width: 0;">
+            <div class="lineup-beer-title">${escapeHtml(b.name)}</div>
+            <div class="lineup-beer-sub">${escapeHtml(b.brewery)}${b.style ? ' • ' + escapeHtml(b.style) : ''}${b.abv ? ' • ' + b.abv + '%' : ''}</div>
           </div>
         </div>
-        <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
+        <div class="lineup-item-actions">
           <button class="btn btn-secondary btn-icon-only btn-move-up" title="Move Up" ${idx === 0 ? 'disabled' : ''}>↑</button>
           <button class="btn btn-secondary btn-icon-only btn-move-down" title="Move Down" ${idx === state.beers.length - 1 ? 'disabled' : ''}>↓</button>
           <button class="btn btn-secondary btn-icon-only btn-delete-beer" title="Remove Beer" style="color: var(--rose-400);">✕</button>

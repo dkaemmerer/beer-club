@@ -120,7 +120,7 @@
             </div>
 
             <!-- Action Controls -->
-            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <div class="host-pour-controls">
               <button id="btn-host-prev-round" class="btn btn-secondary">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="m15 18-6-6 6-6"/>
@@ -171,7 +171,7 @@
 
     <!-- TAB 2: QR Code & Invites -->
     <div id="tab-qr" class="tab-pane" style="display: none;">
-      <div class="card" style="max-width: 540px; margin: 0 auto; text-align: center; padding: 32px 28px;">
+      <div class="card qr-invite-card">
         <span class="badge badge-amber" style="margin-bottom: 10px;">Zero-Install Web App</span>
         <h2 style="font-size: 1.65rem; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 6px;">Scan to Join Tasting</h2>
         <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 20px;">
@@ -179,21 +179,23 @@
         </p>
 
         <div class="qr-box" id="host-qr-container">
-          <img id="host-qr-img" src="" alt="Scan QR Code to Join" style="width: 260px; height: 260px; display: block;">
+          <img id="host-qr-img" src="" alt="Scan QR Code to Join" class="qr-code-img">
         </div>
 
         <div style="margin-top: 12px; text-align: left;">
           <label class="form-label" for="input-join-url">Join URL</label>
-          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-            <input type="text" id="input-join-url" class="form-input" style="margin-bottom: 0; flex: 1; min-width: 200px; font-family: var(--font-mono); font-size: 0.84rem;">
-            <button id="btn-copy-join-url" class="btn btn-primary">Copy Link</button>
-            <button id="btn-share-join-url" class="btn btn-secondary" title="Share Join Link">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
-                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
-              </svg>
-              Share
-            </button>
+          <div class="join-url-row">
+            <input type="text" id="input-join-url" class="form-input join-url-input">
+            <div class="join-url-buttons">
+              <button id="btn-copy-join-url" class="btn btn-primary">Copy Link</button>
+              <button id="btn-share-join-url" class="btn btn-secondary" title="Share Join Link">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+                  <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+                </svg>
+                Share
+              </button>
+            </div>
           </div>
           <div id="crostini-ip-notice" style="display: none; margin-top: 14px; padding: 12px 14px; border-radius: var(--radius-md); background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.28); font-size: 0.8rem; color: var(--text-secondary); line-height: 1.45;">
             <strong style="color: var(--amber-400); display: block; margin-bottom: 4px;">Running inside ChromeOS Linux (100.115.92.x)?</strong>
@@ -214,7 +216,7 @@
           <!-- Event Details Card -->
           <div class="card">
             <h3 style="font-size: 1.08rem; font-weight: 800; margin-bottom: 14px;">Event Theme &amp; Details</h3>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="host-form-row-2col">
               <div>
                 <label class="form-label" for="edit-event-title">Event Title</label>
                 <input type="text" id="edit-event-title" class="form-input" style="margin-bottom: 12px;">
@@ -224,8 +226,8 @@
                 <input type="text" id="edit-event-theme" class="form-input" placeholder="e.g. Midwest Hazy IPAs" style="margin-bottom: 12px;">
               </div>
             </div>
-            <div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 12px;">
-              <div style="flex: 1;">
+            <div class="host-date-save-row">
+              <div style="flex: 1; width: 100%;">
                 <label class="form-label" for="edit-event-date">Event Date</label>
                 <input type="date" id="edit-event-date" class="form-input" style="margin-bottom: 0;">
               </div>
@@ -258,7 +260,7 @@
             <label class="form-label" for="add-beer-brewery">Brewery *</label>
             <input type="text" id="add-beer-brewery" class="form-input" placeholder="e.g. Russian River Brewing">
 
-            <div style="display: grid; grid-template-columns: 1fr 110px; gap: 10px;">
+            <div class="host-style-abv-row">
               <div>
                 <label class="form-label" for="add-beer-style">Style</label>
                 <input type="text" id="add-beer-style" class="form-input" placeholder="Double IPA">
