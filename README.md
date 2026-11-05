@@ -1,18 +1,20 @@
 # 🍻 Beer Club Web Application
 
-A zero-install, real-time web application for hosting blind beer tasting events. Participants join via QR code, taste each pour blindly, and submit scores (1.00 to 5.00 in 0.25 increments). The host orchestrates rounds in real time, and at the end of the night, unmasks the beers with full score distributions, club rankings, and fun superlatives!
+A zero-install, real-time web application for hosting blind beer tasting events. Participants join via QR code, taste each pour blindly, and submit scores (`1.00` to `5.00` in `0.25` increments) along with optional tasting notes. The host orchestrates rounds in real time, and at the end of the night, unmasks the beers with full score distributions, club tasting notes, rankings, and fun superlatives!
 
 ---
 
 ## 🚀 Quick Start (Zero Dependencies)
 
-The app is built entirely with **Python 3 standard library** on the backend and modern vanilla ES6+/CSS on the frontend. No `npm install`, `pip install`, or external database is required.
+The app is built entirely with **Python 3 standard library** on the backend and modern vanilla ES6+/CSS on the frontend. No `npm install`, `pip install`, or external database server is required.
 
 To start the server:
 
 ```bash
 python3 server.py
 ```
+
+*(Or start with a completely blank slate from the command line using `python3 server.py --fresh`)*
 
 By default, the server listens on port **8080**:
 * **Host Control Dashboard:** [http://localhost:8080/host](http://localhost:8080/host)
@@ -24,82 +26,84 @@ By default, the server listens on port **8080**:
 
 ## 📱 How It Works
 
-### 1. Host Setup & QR Code Display
-* Open the **Host Dashboard** at `http://<your-computer-ip>:8080/host`.
-* Click the **"📱 QR Code & Invites"** tab.
-* Display this QR code on a TV, tablet, or laptop screen.
-* Guests scan the code with their mobile cameras and enter their name + choose a fun avatar (🍺, 🍻, 🥨, 🌾, 👑, etc.).
-* Their session persists in `localStorage` so screen lock or page refresh never loses their place.
+### 1. Host Setup, Demo Event & QR Code Display
+* Open the **Host Dashboard** at `http://<your-host-domain-or-ip>:8080/host`.
+* **Demo Event vs. Custom Event:**
+  * By default, the app comes pre-loaded with the **"Fall Brews"** (*Autumnal Themed Beer Flight*) demo event featuring 6 seasonal craft beers.
+  * Clicking **"Demo Event"** in the top bar resets the app back to the *Fall Brews* flight at any time so hosts can do a dry run and learn how the app works before hosting.
+  * Clicking **"New Blank Event"** wipes all beers, participants, and ratings and opens the **Flight & Event** setup tab so the host can enter their own event title, theme, date (via an interactive calendar picker), and custom beer lineup.
+* Click the **"QR & Invites"** tab to display the scannable SVG QR code on a TV, tablet, or laptop screen. Editing the Join URL automatically regenerates the QR code in real time.
+* Guests scan the code with their phone camera, enter their display name, and pick a tasting badge (`🍺`, `🍻`, `🥨`, `🌾`, `👑`, etc.). Sessions persist in `localStorage` so screen locks or refreshes never lose their place.
 
 ### 2. Blind Tasting Rounds (Anti-Spoiler Protected)
 * The host pours Beer #1 without revealing the bottle or can.
-* While the tasting is active, the server **strictly sanitizes all beer metadata**:
-  * Participants only see `"Round 1: Beer #1 (Blind Tasting)"`.
-  * Beer name, brewery, photos, and notes are completely withheld on the server to prevent tech-savvy guests from peeking at browser devtools.
-* Participants rate the beer from **1.00 to 5.00 in 0.25 increments** using:
-  * Smooth slider or `+0.25` / `−0.25` steppers
-  * Quick-select chips (e.g., `3.50`, `3.75`, `4.00`, `4.50`)
-  * Optional flavor tags (Citrusy, Piney, Hoppy, Crisp, Malty, etc.) and personal notes.
-* The host's screen shows a live submission tracker with real-time green checkmarks as votes arrive.
-* When ready, the host clicks **"Advance to Next Beer ➡️"**. All participant screens immediately transition to the next beer via Server-Sent Events (SSE).
+* While the tasting is active, the server **strictly sanitizes all beer metadata** on `/api/events/<id>/state`:
+  * Participants only see `"Beer #1"`, `"Beer #2"`, etc.
+  * Real beer names, breweries, ABV, images, and brewer notes are withheld on the server until the final reveal so even tech-savvy guests inspecting network traffic cannot see spoilers.
+* Participants rate each pour from **1.00 to 5.00 in 0.25 increments** using a bespoke tactile slider with a live animated SVG pint glass and optional blind tasting notes.
+* **Post-Submission Tasting Room Status:** Immediately after submitting a score for the active pour, the participant's screen transitions to a live waiting card showing their locked-in rating, a button to adjust their score if they change their mind, and a real-time room roster showing who has rated and who is still tasting.
+* When ready, the host clicks **"Advance to Next Pour"**. All participant phones automatically transition to the next beer via Server-Sent Events (SSE).
 
-### 3. Late Arrivals & Missed Beers (Subtle History Drawer)
-* To keep the room synchronized, late arrivals automatically land on the **active room round**.
-* If a participant arrived late or stepped away during a round, they can tap the subtle **"📋 Rounds"** button in the top navigation.
-* This slides open a discreet drawer showing all beers in the tasting:
-  * Green badge = Rated (`⭐ 4.25`)
-  * Amber badge = Not rated yet
-* Tapping any prior beer allows them to submit or adjust a rating individually without disrupting the rest of the room.
+### 3. Late Arrivals & Missed Beers (All-Rounds Drawer)
+* Late arrivals automatically land on the **active room round** so the group stays in sync.
+* During blind tasting, participants can tap the rounds button (`1/6`) in the top header to slide open the **Tasting Flight Rounds** drawer:
+  * **Emerald badge:** Rated (`4.25 ★`)
+  * **Amber badge:** Unrated
+* Tapping any round lets them catch up on a missed pour or update a previous score without disrupting the room.
 
-### 4. The Big Reveal & Superlatives
-* After the final beer is poured, the host clicks **"🎉 Reveal All Beers!"**.
-* The server unmasks the beers and pushes the reveal event to everyone in the room.
-* **Participant Reveal Screen:**
-  * **Personal Scorecard:** Highlights the participant's personal top pick and lowest-rated beer.
+### 4. The Big Reveal, Tasting Notes & Superlatives
+* After the final pour, the host clicks **"Reveal All Beers"**.
+* The server unmasks the flight and pushes the reveal screen to every phone in the room.
+* **Locked Rounds on Reveal:** Once the beers are revealed, the rounds drawer is hidden and locked so participants can no longer revisit prior rounds to alter their scores after seeing the labels.
+* **Participant & Host Reveal Experience:**
+  * **Personal Scorecard:** Highlights the participant's personal average, top pour, and lowest-rated pour.
   * **Club Superlatives:**
-    * 🏆 **Club Champion:** Highest average rated beer of the event.
-    * ⚡ **The Polarizer:** Beer with the highest standard deviation (widest split of opinions).
+    * 🏆 **Club Champion:** Highest average rated beer of the night.
+    * ⚡ **The Polarizer:** Beer with the widest split of opinions (highest standard deviation).
     * 🪵 **The Wooden Spoon:** Lowest average rated beer.
-    * 🍷 **The Toughest Critic:** Participant who gave the lowest average score.
-    * ☀️ **The Generous Soul:** Participant who gave the highest average score.
-    * 🎯 **The Room's Pulse / Consensus Voice:** Participant whose scores aligned closest with group consensus.
-  * **Interactive Histograms:** Every beer displays an interactive SVG bar chart showing the frequency of votes across the entire 1.0 to 5.0 spectrum.
+    * 🍷 **The Toughest Critic:** Participant with the lowest average score.
+    * ☀️ **The Generous Soul:** Participant with the highest average score.
+    * 🎯 **Consensus Voice:** Participant whose scores aligned closest with the room average.
+  * **0.25-Increment Histograms & Tasting Notes:** Every beer card displays an SVG distribution chart across the `1.00`–`5.00` scale alongside the participant's own blind tasting note and all club tasting notes submitted by the room.
 
 ---
 
 ## 🛠️ Testing
 
-A comprehensive automated test suite is included:
+Run the automated unit and integration test suite with:
 
 ```bash
 python3 test_beerclub.py
 ```
 
-Tests cover:
-* SQLite schema, data integrity, and cascading operations.
-* Strict anti-spoiler masking during active blind tasting vs. full exposure upon reveal.
-* 0.25 increment validation and rounding bounds.
+Tests verify:
+* SQLite schema, foreign-key cascades, and lineup re-ordering.
+* Strict anti-spoiler masking during active blind tasting vs. full metadata exposure upon reveal.
+* `0.25` increment validation and clamping bounds (`1.00` to `5.00`).
 * Late arrivals, retroactive rating submissions, and score adjustments.
-* Standard deviation, room consensus, and superlative mathematics.
-* Real-time HTTP REST endpoints and QR code generation.
+* Standard deviation, histogram bucketing, and superlative calculations.
+* Live HTTP REST endpoints and SVG QR code generation.
 
 ---
 
 ## 📂 Project Architecture
 
-```
+All files are organized in a flat root directory for effortless single-step uploads to GitHub and cloud hosts (such as Render):
+
+```text
 Beer Club/
-├── server.py              # Multithreaded HTTP server + SSE real-time engine + REST API
-├── db.py                  # SQLite schema, queries, anti-spoiler logic, and analytics engine
+├── server.py              # Multithreaded HTTP server, SSE real-time broadcaster & REST API
+├── db.py                  # SQLite schema, Fall Brews demo seed, anti-spoiler masking & analytics
 ├── qrcode_gen.py          # Zero-dependency pure Python QR code generator (SVG output)
-├── test_beerclub.py       # Comprehensive unit and integration test suite
-├── static/
-│   ├── index.html         # Mobile-first participant view & reveal experience
-│   ├── host.html          # Host orchestration dashboard, QR display & lineup manager
-│   ├── css/
-│   │   └── style.css      # Dark-mode pub aesthetic design system (responsive, high-contrast)
-│   └── js/
-│       ├── app.js         # Participant state manager, SSE client, 0.25 slider & drawer
-│       └── host.js        # Host dashboard manager, live submission ticker & controls
+├── index.html             # Mobile-first participant view (Join, Tasting Slider, Room Status, Reveal)
+├── host.html              # Host director dashboard (Live Control, QR Invites, Lineup Setup, Results)
+├── style.css              # Modern dark-mode craft taproom design system (responsive mobile & desktop)
+├── app.js                 # Participant frontend logic, SSE client, 0.25 slider & rounds drawer
+├── host.js                # Host dashboard frontend logic, round stepper, lineup editor & QR sync
+├── test_beerclub.py       # Automated unit and integration test suite
+├── render.yaml            # Render.com Infrastructure-as-Code blueprint
+├── Procfile               # Cloud process launcher definition
+├── requirements.txt       # Python dependency manifest (stdlib only)
+├── .gitignore             # Excludes local SQLite database files and Python cache from Git
 └── README.md              # Project documentation
 ```
